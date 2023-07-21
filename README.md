@@ -24,7 +24,7 @@ pluginManagement {
 }
 ```
 
-### Configuration
+### Configuration Example
 
 `build.gradle`:
 ```
@@ -46,3 +46,10 @@ minepkg {
 ```
 
 You can get an API key on https://minepkg.io/docs/ci.
+
+
+### Publishing
+
+Simply run
+
+```gradle minepkg```
