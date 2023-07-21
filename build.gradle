@@ -1,0 +1,38 @@
+plugins {
+	id 'groovy-gradle-plugin'
+	id 'maven-publish'
+}
+
+repositories {
+	mavenCentral()
+}
+
+group 'io.github.fourmisain'
+version '0.7.0'
+
+gradlePlugin {
+	plugins {
+		minepkg_publish {
+			id = 'minepkg-publish'
+			implementationClass = 'io.github.fourmisain.minepkg.MinepkgPlugin'
+		}
+	}
+}
+
+publishing {
+	repositories {
+		def GITLAB_DEPLOY_TOKEN = System.getenv("GITLAB_DEPLOY_TOKEN")
+		if (GITLAB_DEPLOY_TOKEN != null) {
+			maven {
+				url "https://gitlab.com/api/v4/projects/37712942/packages/maven"
+				credentials(HttpHeaderCredentials) {
+					name = 'Deploy-Token'
+					value = GITLAB_DEPLOY_TOKEN
+				}
+				authentication {
+					header(HttpHeaderAuthentication)
+				}
+			}
+		}
+	}
+}
