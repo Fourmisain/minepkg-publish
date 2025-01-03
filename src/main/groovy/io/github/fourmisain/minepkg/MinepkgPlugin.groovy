@@ -8,8 +8,8 @@ import org.gradle.api.tasks.bundling.AbstractArchiveTask
 class MinepkgPlugin implements Plugin<Project> {
 	void apply(Project project) {
 		project.task('minepkg') {
-			group 'publishing'
-			description 'Publishes a minepkg release.'
+			group = 'publishing'
+			description = 'Publishes a minepkg release.'
 
 			doNotTrackState("nothing to track locally")
 
