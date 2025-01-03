@@ -7,8 +7,8 @@ repositories {
 	mavenCentral()
 }
 
-group 'io.github.fourmisain'
-version '0.7.0'
+group = 'io.github.fourmisain'
+version = '0.7.0'
 
 gradlePlugin {
 	plugins {
@@ -24,7 +24,7 @@ publishing {
 		def GITLAB_DEPLOY_TOKEN = System.getenv("GITLAB_DEPLOY_TOKEN")
 		if (GITLAB_DEPLOY_TOKEN != null) {
 			maven {
-				url "https://gitlab.com/api/v4/projects/37712942/packages/maven"
+				url = "https://gitlab.com/api/v4/projects/37712942/packages/maven"
 				credentials(HttpHeaderCredentials) {
 					name = 'Deploy-Token'
 					value = GITLAB_DEPLOY_TOKEN
