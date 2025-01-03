@@ -22,7 +22,9 @@ gradlePlugin {
 publishing {
 	repositories {
 		def GITLAB_PRIVATE_ACCESS_TOKEN = System.getenv("GITLAB_PRIVATE_ACCESS_TOKEN")
-		if (GITLAB_PRIVATE_ACCESS_TOKEN != null) {
+		if (GITLAB_PRIVATE_ACCESS_TOKEN == null) {
+			throw new GradleException("GITLAB_PRIVATE_ACCESS_TOKEN not defined")
+		} else {
 			maven {
 				url = "https://gitlab.com/api/v4/projects/37712942/packages/maven"
 				credentials(HttpHeaderCredentials) {
