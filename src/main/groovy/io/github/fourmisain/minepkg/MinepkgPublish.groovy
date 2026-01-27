@@ -1,6 +1,7 @@
 package io.github.fourmisain.minepkg
 
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
 
 class MinepkgPublish {
 	private apiKey
@@ -49,18 +50,29 @@ class MinepkgPublish {
 		return request("DELETE", "https://api.preview.minepkg.io/v1/releases/${platform}/${identifier}")
 	}
 
+	@CompileStatic
 	def request(String method, String url, byte[] data = null, String contentType = "application/json") {
-		URLConnection c = new URL(url).openConnection()
-		c.setRequestMethod(method)
-		c.setRequestProperty("User-Agent", "minepkg gradle plugin")
-		c.setRequestProperty("Authorization", "api-key ${this.apiKey}")
-		c.setRequestProperty("Content-Type", contentType)
-		if (data != null) {
-			c.setDoOutput(true)
-			c.setFixedLengthStreamingMode(data.length)
-			c.getOutputStream().write(data);
+		HttpURLConnection c = (HttpURLConnection) new URI(url).toURL().openConnection()
+		try {
+			c.setRequestMethod(method)
+			c.setRequestProperty("User-Agent", "minepkg gradle plugin")
+			c.setRequestProperty("Authorization", "api-key ${this.apiKey}")
+			c.setRequestProperty("Content-Type", contentType)
+
+			if (data != null) {
+				c.setDoOutput(true)
+				c.setFixedLengthStreamingMode(data.length)
+				try (def output = c.getOutputStream()) {
+					output.write(data)
+				}
+			}
+
+			try (def input = c.getInputStream()) {
+				def response = input.getBytes()
+				return [c.getResponseCode(), response]
+			}
+		} finally {
+			c.disconnect()
 		}
-		def response = c.getInputStream().getBytes()
-		return [c.getResponseCode(), response]
 	}
 }
