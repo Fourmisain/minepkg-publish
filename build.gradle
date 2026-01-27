@@ -19,6 +19,11 @@ gradlePlugin {
 	}
 }
 
+// Groovy 4 is compatible with Java 8
+java {
+	targetCompatibility = 8
+}
+
 def GITLAB_PRIVATE_ACCESS_TOKEN = System.getenv("GITLAB_PRIVATE_ACCESS_TOKEN")
 tasks.register('checkAccessToken') {
 	doLast {
