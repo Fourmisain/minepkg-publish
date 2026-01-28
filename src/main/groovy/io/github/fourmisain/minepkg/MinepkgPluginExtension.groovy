@@ -1,66 +1,66 @@
 package io.github.fourmisain.minepkg
 
 import groovy.json.JsonOutput
+import org.gradle.api.provider.MapProperty
+import org.gradle.api.provider.Property
 
-class MinepkgPluginExtension {
-	def apiKey
-	def artifact
-
-	private manifest = [
-		manifestVersion: 0,
-		package        : [
-			type       : 'mod',
-			platform   : 'fabric',
-		],
-		requirements   : [:],
-		dependencies   : [:],
-		meta           : [
-			published: false
-		]
-	]
-	private pkg = manifest['package']
-	private req = manifest['requirements']
-
-	def setName(String name) {
-		pkg['name'] = name
+abstract class MinepkgPluginExtension {
+	MinepkgPluginExtension() {
+		getPlatform().convention("fabric")
 	}
 
-	def setVersion(String version) {
-		pkg['version'] = version
-	}
+	abstract Property<String> getApiKey();
+	abstract Property<Object> getArtifact();
 
-	def setPlatform(String platform) {
-		pkg['platform'] = platform
-	}
+	abstract Property<String> getName();
+	abstract Property<String> getVersion();
+	abstract Property<String> getPlatform();
+	abstract Property<String> getLicense();
+	abstract Property<String> getMinecraftVersionRange();
+	abstract Property<String> getFabricLoaderVersionRange();
 
-	def setLicense(String license) {
-		pkg['license'] = license
-	}
-
-	def setMinecraftVersionRange(String versionRange) {
-		req['minecraft'] = versionRange
-	}
-
-	def setFabricLoaderVersionRange(String versionRange) {
-		req['fabricLoader'] = versionRange
-	}
+	protected abstract MapProperty<String, String> getDependencies();
 
 	def require(String modId, String versionRange = '*') {
-		manifest['dependencies'][modId] = versionRange
-	}
-
-	protected def validateEntry(String category, String key) {
-		if (!manifest[category][key]) throw new IllegalStateException("${key} not set")
+		dependencies.put(modId, versionRange)
 	}
 
 	String toJson() {
-		['name', 'version', 'platform',].forEach { validateEntry('package', it) }
-		validateEntry('requirements', 'minecraft')
+		def manifest = [
+			manifestVersion: 0,
+			package        : [
+				type       : 'mod',
+				platform   : 'fabric',
+			],
+			requirements   : [:],
+			dependencies   : [:],
+			meta           : [
+				published: false
+			]
+		]
+
+		def ifPresent = { p, closure -> if (p.isPresent()) closure.call(p.get()) }
+
+		def pkg = manifest['package']
+		pkg['name'] = name.get()
+		pkg['version'] = version.get()
+		pkg['platform'] = platform.get()
+		ifPresent(license) { pkg['license']  = it }
+
+		def req = manifest['requirements']
+		req['minecraft'] = minecraftVersionRange.get()
+		ifPresent(fabricLoaderVersionRange) { req['fabricLoader'] = it }
+
+		manifest['dependencies'] += dependencies.get()
 
 		if (pkg['platform'] == 'fabric') {
 			if (!req['fabricLoader']) req['fabricLoader'] = '*'
 		}
 
 		return JsonOutput.toJson(manifest)
+	}
+
+	String toPrettyJson() {
+		return JsonOutput.prettyPrint(toJson())
 	}
 }
